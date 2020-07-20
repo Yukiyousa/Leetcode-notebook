@@ -1,0 +1,589 @@
+# 一.引论.leetcode二叉树定义
+
+```c
+Definition for a binary tree node.
+struct TreeNode {
+	int val;
+	struct TreeNode *left;
+	struct TreeNode *right;
+};
+```
+
+**树的遍历方式总体分为两类**深度优先搜索（DFS）、广度优先搜索（BFS）；
+
+- 常见的 DFS ： 先序遍历、中序遍历、后序遍历
+
+- 常见的 BFS ： 层序遍历（即按层遍历）
+
+# 二.二叉树基本函数
+
+```c
+Definition for a binary tree node.
+struct TreeNode {
+	int val;
+	struct TreeNode *left;
+	struct TreeNode *right;
+};
+```
+
+**树的遍历方式总体分为两类**深度优先搜索（DFS）、广度优先搜索（BFS）；
+
+- 常见的 DFS ： 先序遍历、中序遍历、后序遍历
+
+- 常见的 BFS ： 层序遍历（即按层遍历）
+
+## 105.二叉树的最大深度
+
+给定一个二叉树，找出其最大深度。
+
+二叉树的深度为根节点到最远叶子节点的最长路径上的节点数。
+
+**示例：**给定二叉树 [3,9,20,null,null,15,7]，
+
+```markdownm
+	3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+返回它的最大深度 3 。
+
+**使用递归**
+
+```c
+int maxDepth(struct TreeNode* root){
+    if(root==NULL){
+        return 0;
+    }
+    int left=maxDepth(root->left)+1;
+    int right=maxDepth(root->right)+1;
+    return left>=right?left:right;
+}
+```
+
+## 110.平衡二叉树
+
+### 1.题目描述
+
+给定一个二叉树，判断它是否是高度平衡的二叉树。
+
+平衡二叉树定义为：一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过1。
+
+    给定二叉树 [3,9,20,null,null,15,7]
+      3
+     / \
+      9  20
+        /  \
+       15   7
+    返回 true 
+
+### 2.题解
+
+```c
+int BinartTreeHeight(struct TreeNode* node){//求子树的深度
+    if(node==NULL){
+        return 0;
+    }
+    int leftHigh=BinartTreeHeight(node->left);
+    int rightHigh=BinartTreeHeight(node->right);
+    return leftHigh>rightHigh?leftHigh+1:rightHigh+1;
+}
+
+bool isBalanced(struct TreeNode* root){
+    if(root==NULL){
+        return true;
+    }
+    int left=BinartTreeHeight(root->left);//左子树深度
+    int right=BinartTreeHeight(root->right);//右子树深度
+    if(left-right>1 || right-left>1){
+        return false;
+    }
+    return isBalanced(root->left)&&isBalanced(root->right);
+}
+```
+
+## 543.二叉树的直径
+
+给定一棵二叉树，你需要计算它的直径长度。一棵二叉树的直径长度是任意两个结点路径长度中的最大值。这条路径可能穿过也可能不穿过根结点。
+
+示例 :给定二叉树
+
+          1
+         / \
+        2   3
+       / \     
+      4   5    
+
+返回 3, 它的长度是路径 [4,2,1,3] 或者 [5,2,1,3]。
+
+```c
+int TreeHigh(struct TreeNode* root,int *result){
+    if(root==NULL){
+        return 0;
+    }
+    int left=TreeHigh(root->left,result);
+    int right=TreeHigh(root->right,result);
+    if(left+right>*result){
+        *result=left+right;
+    }
+    return (left>=right?left+1:right+1);
+}
+int diameterOfBinaryTree(struct TreeNode* root){
+    int result=0;
+    TreeHigh(root,&result);
+    return result;
+}
+```
+
+## 236.二叉树的最近公共祖先
+
+### 1.题目描述
+
+给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。
+
+最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”
+
+示例 ：
+
+```markdown
+输入: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1
+输出: 3
+解释: 节点 5 和节点 1 的最近公共祖先是节点 3。
+```
+
+### 2.题解
+
+根据以上定义，若 root是 p, q 的 最近公共祖先 ，则只可能为以下情况之一：
+
+​	p和 q 在 root的子树中，且分列 root的 异侧（即分别在左、右子树中）；
+​	p = root，且 q 在 root 的左或右子树中；
+​	q = root，且 p 在 root 的左或右子树中；
+
+```c
+struct TreeNode* lowestCommonAncestor(struct TreeNode* root, struct TreeNode* p, struct TreeNode* q){
+    //终止条件
+    if(root==NULL||root==p||root==q){
+        return root;
+    }
+    //递归过程
+    struct TreeNode*left=lowestCommonAncestor(root->left,p,q);
+    struct TreeNode*right=lowestCommonAncestor(root->right,p,q);
+    //单次操作
+    if(left==NULL){
+        return right;
+    }
+    if(right==NULL){
+        return left;
+    }
+    //返回值
+    return root;//当左右均不为空时，说明这个结点就是它们的最近公共祖先
+}
+```
+
+### 3.复杂度分析：
+
+​	**时间复杂度 O(N)** ： 其中 N 为二叉树节点数；最差情况下（树退化为链表时），需要递归遍历树的所有节点。
+​	**空间复杂度 O(N)** ： 最差情况下，递归深度达到 N ，系统使用 O(N) 大小的额外空间。
+
+# 三.二叉树的遍历
+
+## 引论.模板语法
+
+```c
+while( 栈非空 || p 非空)
+{
+if( p 非空)
+{
+
+}
+else
+{
+
+}
+}
+```
+
+## 144.二叉树的前序遍历
+
+### 1.递归
+
+```c
+void preorder(struct TreeNode* root,int* returnSize,int *res)/*中序遍历二叉树*/
+{
+   if(root==NULL) return;
+   res[(*returnSize)++]=root->val;
+   preorder(root->left,returnSize,res);
+   preorder(root->right,returnSize,res);
+
+}
+int size(struct TreeNode* root)/*求二叉树数据个数*/
+{
+   if(!root) return 0;
+   return size(root->left)+size(root->right)+1;
+}
+int* preorderTraversal(struct TreeNode* root, int* returnSize){
+    int treesize=size(root);
+    int *res=(int *)malloc(sizeof(int)*treesize);
+    *returnSize=0;
+    preorder(root,returnSize,res);
+    return res;
+}
+```
+
+### 2.非递归
+
+```c
+int* preorderTraversal(struct TreeNode* root, int* returnSize){
+    struct TreeNode **stack=(struct TreeNode**)malloc(sizeof(struct TreeNode*)*1000);
+    int *res=(int*)malloc(sizeof(int)*10000);
+    int i=0,top=0;
+    struct TreeNode *p=NULL;
+    stack[0]=root;
+    while(top!=-1){
+        p=stack[top];
+        top--;//pop
+        while(p){
+            res[i++]=p->val;
+            if(p->right){
+                stack[++top]=p->right;//push
+            }
+            p=p->left;
+        }
+    }
+    *returnSize=i;
+    return res;
+}
+```
+
+```c
+int* preorderTraversal(struct TreeNode* root, int* returnSize){
+    struct TreeNode **stack=(struct TreeNode**)malloc(sizeof(struct TreeNode*)*1000);
+    int *res=(int*)malloc(sizeof(int)*10000);
+    int top=-1;
+    *returnSize=0;
+    struct TreeNode *p=root;
+    while(p!=NULL || top!=-1){
+       if(p){
+           stack[++top]=p;
+           res[(*returnSize)++]=p->val;
+           p=p->left;
+       }else{
+           p=stack[top--];
+           p=p->right;
+       }
+    }
+    return res;
+}
+```
+
+## 94.二叉树中序遍历
+
+### 1.递归
+
+```c
+void inorder(struct TreeNode* root,int* returnSize,int *res)/*中序遍历二叉树*/
+{
+   if(root==NULL) return;
+   inorder(root->left,returnSize,res);
+   res[(*returnSize)++]=root->val;
+   inorder(root->right,returnSize,res);
+
+}
+int size(struct TreeNode* root)/*求二叉树数据个数*/
+{
+   if(!root) return 0;
+   return size(root->left)+size(root->right)+1;
+}
+int* inorderTraversal(struct TreeNode* root, int* returnSize){
+    int treesize=size(root);
+    int *res=(int *)malloc(sizeof(int)*treesize);
+    *returnSize=0;
+    inorder(root,returnSize,res);
+    return res;
+}
+```
+
+### 2.非递归
+
+```c
+int* inorderTraversal(struct TreeNode* root, int* returnSize){
+    struct TreeNode **stack=(struct TreeNode**)malloc(sizeof(struct TreeNode*)*1000);
+    int *res=(int*)malloc(sizeof(int)*10000);
+    int i=0,top=0;
+    struct TreeNode *p=NULL;
+    stack[0]=root;
+    while(top!=-1){
+        while(stack[top]!=NULL){
+            stack[++top]=stack[top]->left;//push
+        }
+        top--;//pop
+        if(top!=-1){
+            p=stack[top];
+            res[i++]=p->val;
+            stack[top]=p->right;
+        }
+    }
+    *returnSize=i;
+    return res;
+}
+```
+
+```c
+int* inorderTraversal(struct TreeNode* root, int* returnSize){
+    struct TreeNode **stack=(struct TreeNode**)malloc(sizeof(struct TreeNode*)*1000);
+    int *res=(int*)malloc(sizeof(int)*10000);
+    int top=-1;
+    *returnSize=0;
+    struct TreeNode *p=root;
+    while(p!=NULL || top!=-1){
+        if(p){
+            stack[++top]=p;//push
+            p=p->left;
+        }else{
+            p=stack[top--];//pop
+            res[(*returnSize)++]=p->val;
+            p=p->right;
+        }
+    }
+    return res;
+}
+```
+
+## 145.二叉树的后序遍历
+
+### 1.递归
+
+```c
+void postorder(struct TreeNode*root,int *returnSize,int *res){
+    if(root==NULL){
+        return;
+    }
+    postorder(root->left,returnSize,res);
+    postorder(root->right,returnSize,res);
+    res[(*returnSize)++]=root->val;
+}
+int size(struct TreeNode* root){
+    if(root==NULL){
+        return 0;
+    }
+    return size(root->left)+size(root->right)+1;
+}
+int* postorderTraversal(struct TreeNode* root, int* returnSize){
+    int treesize=size(root);
+    int *res=(int *)malloc(sizeof(int)*treesize);
+    *returnSize=0;
+    postorder(root,returnSize,res);
+    return res;
+}
+```
+
+### 2.非递归
+
+```c
+int* postorderTraversal(struct TreeNode* root, int* returnSize){
+    *returnSize=0;
+    struct TreeNode **stack=(struct TreeNode**)malloc(sizeof(struct TreeNode*)*1000);
+    int *res=(int*)malloc(sizeof(int)*10000);
+    int top=-1;
+    struct TreeNode *p=root,*r;
+    while(p || top!=-1){
+        if(p){
+            stack[++top]=p;//push
+            p=p->left;
+        }else{
+            p=stack[top];
+            if(p->right && p->right!=r){
+                p=p->right;
+                stack[++top]=p;
+                p=p->left;
+            }else{
+                p=stack[top];
+                res[(*returnSize)++]=p->val;
+                top--;//pop
+                r=p;
+                p=NULL;
+            }
+        }
+    }
+    return res;
+}
+```
+
+## 102.二叉树的层次遍历
+
+### 1.题目描述
+
+二叉树：[3,9,20,null,null,15,7],
+
+    	3
+       / \
+      9  20
+        /  \
+       15   7
+
+返回其层次遍历结果：
+
+```
+[
+  [3],
+  [9,20],
+  [15,7]
+]
+```
+
+### 2.题目分析
+
+```c
+int** levelOrder(struct TreeNode* root, int* returnSize, int** returnColumnSizes)
+```
+
+1、理解参数和返回值的含义，返回一个指针数组，每个成员指向当前下标所在层的所有节点（另一个数组）。returnSize为返回数组的个数。returnColumnSizes指向一个数组，每个成员对应返回数组里相同下标（某一层）指向的一维数组（存储所有节点）的个数。
+2、用队列实现广度优先算法，注意每次循环，都需要把队列里属于某一层的节点全部出队。如果用指针队列需要注意统计当前队列的个数。
+
+### 3.题解
+
+```c
+#define MAX_SIZE 1000
+int** levelOrder(struct TreeNode* root, int* returnSize, int** returnColumnSizes){
+ 	struct TreeNode*queue[MAX_SIZE]={0};
+    int head=0,tail=0;
+    if(root==NULL){
+        *returnSize=0;
+        return NULL;
+    }
+    int **res=(int**)malloc(sizeof(int *)*MAX_SIZE);//申请一个指针数组其元素为指针作为返回数组
+    *returnColumnSizes=(int *)malloc(sizeof(int*)*MAX_SIZE);
+    queue[tail++]=root;//push root
+    *returnSize=0;
+    while(head<tail){
+        int size=(tail-head+MAX_SIZE)%MAX_SIZE;
+        (*returnColumnSizes)[*returnSize]=size;
+        res[*returnSize]=(int *)malloc(sizeof(int)*size);
+        for(int i=0;i<size;i++){
+            struct TreeNode*tmp=queue[head++];//pop queue
+            res[*returnSize][i]=tmp->val;
+            if(tmp->left){
+                queue[tail++]=tmp->left;
+            }
+            if(tmp->right){
+                queue[tail++]=tmp->right;
+            }
+        }
+        (*returnSize)++;
+    }
+    return res;
+}
+```
+
+# 四.二叉搜索树
+
+## 109.有序链表转换二叉搜索树
+
+### 1.题目描述
+
+给定一个单链表，其中的元素按升序排序，将其转换为高度平衡的二叉搜索树。
+
+本题中，一个高度平衡二叉树是指一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1。
+
+示例:
+
+    给定的有序链表： [-10, -3, 0, 5, 9],
+    一个可能的答案是：[0, -3, 9, -10, null, 5], 它可以表示下面这个高度平衡二叉搜索树：
+     	   0
+          / \
+        -3   9
+       /   /
+     -10  5
+
+### 2.题目分析
+
+​	本题目采用**分治法**。将有序链表遍历到数组中，对数组进行分治递归即可。将有序链表遍历到数组中，对数组进行分治递归即可。首先要找到根节点，根节点就是数组最中间的值，如果是奇数就取最中间，偶数我们这里选择取中间靠左的位置，直接（left+right）/2即可，然后左边调用left~mid，右边mid+1~right，递归调用即可。
+
+​	**注意**  众所周知极端情况下二分求中点`int mid = (right+left)/2;`可能会溢出，`int mid = left + (right - left)/2;`会更安全
+
+### 3.题解
+
+```c
+struct TreeNode* sortArrayToBST(int left,int right,int *nums){
+    if(left >= right){
+        return NULL;
+    }
+    int mid = 0;
+    mid = (left+right)/2;
+    struct TreeNode *node = malloc(sizeof(struct TreeNode));
+    node->val = nums[mid];
+    node->left = sortArrayToBST(left,mid,nums);
+    node->right = sortArrayToBST(mid+1,right,nums);
+    return node;
+}
+
+struct TreeNode* sortedListToBST(struct ListNode* head){
+    int nums[100000],numsSize=0;
+    for(;head !=NULL;head = head->next){
+        nums[numsSize] = head -> val;
+        numsSize++;
+    }
+    return sortArrayToBST(0,numsSize,nums);
+}
+```
+
+## 108.将有序数组转换为二叉搜索树
+
+​	同理于109
+
+## Offer 54.二叉搜索树的第k大结点
+
+### 1.题目描述
+
+给定一棵二叉搜索树，请找出其中第k大的节点。
+
+```markdown
+输入: root = [3,1,4,null,2], k = 1
+   3
+  / \
+ 1   4
+  \
+   2
+输出: 4
+```
+
+### 2.题目分析
+
+​	二叉搜索树的性质:中序遍历一棵二叉搜索树，其结果是二叉树树节点从小到大的升序排列
+​	故我们对该二叉搜索树进行中序遍历(DLR)同时将结点val放在数组中，只需通过数组下标便可找到第k大节点
+
+### 3.题解
+
+```c
+int* inorderTraversal(struct TreeNode* root,int *returnSize){//中序遍历
+    struct TreeNode **stack=(struct TreeNode**)malloc(sizeof(struct TreeNode*)*1000);
+    int *res=(int*)malloc(sizeof(int)*10000);
+    int top=-1;
+    *returnSize=0;
+    struct TreeNode *p=root;
+    while(p!=NULL || top!=-1){
+        if(p){
+            stack[++top]=p;//push
+            p=p->left;
+        }else{
+            p=stack[top--];//pop
+            res[(*returnSize)++]=p->val;
+            p=p->right;
+        }
+    }
+    return res;
+}
+
+int kthLargest(struct TreeNode* root, int k){
+    int size;
+    int *temp=inorderTraversal(root,&size);
+    return temp[size-k];//选择第k大元素
+}
+```
+
+
+
+
+
